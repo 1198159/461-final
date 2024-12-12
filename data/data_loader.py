@@ -14,6 +14,7 @@ from scipy.spatial.transform import Slerp
 import gsoup
 from data import pose_format_converter
 from collections import defaultdict
+import re
 
 def get_pattern_names(amount, length, voronoi_amount=3):
     pattern_amount = amount
@@ -38,7 +39,7 @@ def get_pattern_names(amount, length, voronoi_amount=3):
     selected_textures = y
     # if len(selected_textures) < N_VIEWS:
     #     selected_textures = np.concatenate((selected_textures, np.full(N_VIEWS - len(selected_textures), "all_black")))
-    return selected_textures
+    return x, selected_textures
 
 def blender_pose_to_cv(blender_pose):
     assert blender_pose.shape == (4, 4)
@@ -84,6 +85,9 @@ def process_rawdata_folder(folder, colmap_mode):
             raw_frames = raw_frames[:len(squeezed_texture_indices)]
             file_names = ["{:04d}.png".format(x) for x in range(len(raw_frames))]
             gsoup.save_images(raw_frames, folder, file_names=file_names)
+            # probably need the following line for windows, test it at some point
+            # see https://github.com/yoterel/nepmap/issues/5
+            # file_names.sort(key=lambda name: int(re.findall(r'\d+', name)[0]))
             write_img2tex_file({x: y for x, y in zip(file_names, actual_texture_names)},
                            {x: i for i, x in enumerate(file_names)},
                            Path(folder, "img2tex.json"))
