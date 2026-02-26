@@ -1411,9 +1411,28 @@ def render_sandbox(radiance_field, occupancy_grid, scene_aabb,
                 light_field["projectors"][0]["v"] = cur_v
         elif mode == "play_vid":  # streams a raw video onto the scene. projector is fixed while camera moves in circular motion.
             from gsoup.video import VideoReader
+            # reader = VideoReader(Path(extra_info["vid_path"]),
+            #                     int(light_field["projectors"][0]["H"].item()),
+            #                     int(light_field["projectors"][0]["W"].item()),
+            #                     verbose=True)
+            
+             #NEW CODE ADDED FOR 461
+             #this does the extra preprocessing that was needed to get the code runnign
+
+            from gsoup.video import get_video_info
+            vid_h, vid_w, _, _ = get_video_info(Path(extra_info["vid_path"]))
+            target_h = int(light_field["projectors"][0]["H"].item())
+            target_w = int(light_field["projectors"][0]["W"].item())
+            # find largest divisor of video res that is <= target
+            def snap_res(vid_dim, target_dim):
+                for d in range(target_dim, 0, -1):
+                    if vid_dim % d == 0:
+                        return d
+            target_h = snap_res(vid_h, target_h)
+            target_w = snap_res(vid_w, target_w)
             reader = VideoReader(Path(extra_info["vid_path"]),
-                                int(light_field["projectors"][0]["H"].item()),
-                                int(light_field["projectors"][0]["W"].item()),
+                                target_h,
+                                target_w,
                                 verbose=True)
             frames = gsoup.to_torch(np.array([frame for frame in reader]), device=args.device) / 255
             if "stride" in extra_info:

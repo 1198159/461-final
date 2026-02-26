@@ -445,8 +445,11 @@ if __name__ == "__main__":
                 elif phase == 2:  # optimize optical elements
                     for param in optimizer.param_groups[opt_group["net"]]["params"]:
                         param.requires_grad = False
-                    for param in optimizer.param_groups[opt_group["vis"]]["params"]:
-                        param.requires_grad = False
+                        #NEW CODE ADDED FOR 461
+                    if "vis" in opt_group:
+                        for param in optimizer.param_groups[opt_group["vis"]]["params"]:
+                            param.requires_grad = False
+ 
                     for param in optimizer.param_groups[opt_group["coloc"]]["params"]:
                         param.requires_grad = False
                     for param in optimizer.param_groups[opt_group["proj_geo"]]["params"]:
@@ -475,23 +478,34 @@ if __name__ == "__main__":
                     # if not args.nerf_checkpoint:
                     for param in radiance_field.mlp.parameters():
                         param.requires_grad = True #False
-                    for param in optimizer.param_groups[opt_group["vis"]]["params"]:
-                        param.requires_grad = True
-                    for param in optimizer.param_groups[opt_group["coloc"]]["params"]:
-                        param.requires_grad = True
-                    for param in optimizer.param_groups[opt_group["proj_geo"]]["params"]:
-                        param.requires_grad = True
-                    for param in optimizer.param_groups[opt_group["proj_col"]]["params"]:
-                        param.requires_grad = True
+                         #NEW CODE ADDED FOR 461
+                       
+                    if "vis" in opt_group:
+                        for param in optimizer.param_groups[opt_group["vis"]]["params"]:
+                            param.requires_grad = True
+                    if "coloc" in opt_group:
+                        for param in optimizer.param_groups[opt_group["coloc"]]["params"]:
+                            param.requires_grad = True
+                    if "proj_geo" in opt_group:
+                        for param in optimizer.param_groups[opt_group["proj_geo"]]["params"]:
+                            param.requires_grad = True
+                    if "proj_col" in opt_group:
+                        for param in optimizer.param_groups[opt_group["proj_col"]]["params"]:
+                            param.requires_grad = True
                     if "cams" in opt_group:
                         for param in optimizer.param_groups[opt_group["cams"]]["params"]:
                             param.requires_grad = False
                         optimizer.param_groups[opt_group["cams"]]['lr'] = args.lr / 16
                     optimizer.param_groups[opt_group["net"]]['lr'] = args.lr / 32
-                    optimizer.param_groups[opt_group["vis"]]['lr'] = args.lr / 32
-                    optimizer.param_groups[opt_group["proj_geo"]]['lr'] = args.lr / 4
-                    optimizer.param_groups[opt_group["proj_col"]]['lr'] = args.lr
-                    optimizer.param_groups[opt_group["coloc"]]['lr'] = args.lr / 4
+                        #NEW CODE ADDED FOR 461
+                    if "vis" in opt_group:
+                        optimizer.param_groups[opt_group["vis"]]['lr'] = args.lr / 32
+                    if "proj_geo" in opt_group:
+                        optimizer.param_groups[opt_group["proj_geo"]]['lr'] = args.lr / 4
+                    if "proj_col" in opt_group:    
+                        optimizer.param_groups[opt_group["proj_col"]]['lr'] = args.lr
+                    if "coloc" in opt_group:
+                        optimizer.param_groups[opt_group["coloc"]]['lr'] = args.lr / 4
                 else:
                     pass
             data = train_dataset[i]
